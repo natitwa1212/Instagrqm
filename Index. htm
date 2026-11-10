@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<h1 class="brand-logo">Instagrqm 📸</h1>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+.brand-logo {
+    font-family: 'Pacifico', cursive;
+    font-size: 36px;
+    font-weight: normal;
+}
+body {
+    margin: 0;
+    background: #fafafa;
+    font-family: Arial, sans-serif;
+    color: #262626;
+}
+
+header {
+    background: white;
+    padding: 16px;
+    font-size: 27px;
+    font-weight: bold;
+    border-bottom: 1px solid #ddd;
+    position: sticky;
+    top: 0;
+}
+
+.stories {
+    display: flex;
+    overflow-x: auto;
+    background: white;
+    padding: 15px;
+    gap: 18px;
+}
+
+.story {
+    text-align: center;
+    min-width: 65px;
+}
+
+.story img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px solid #e1306c;
+    object-fit: cover;
+}
+
+.post {
+    background: white;
+    margin: 12px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.username {
+    padding: 15px;
+    font-weight: bold;
+}
+
+.post img {
+    width: 100%;
+    max-height: 600px;
+    object-fit: cover;
+}
+
+.actions {
+    padding: 10px;
+}
+
+.actions button {
+    border: none;
+    background: none;
+    font-size: 27px;
+    cursor: pointer;
+    margin-right: 12px;
+}
+
+.caption {
+    padding: 5px 12px;
+}
+
+.comments {
+    padding: 12px;
+}
+
+.comment-input {
+    width: 75%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.comment-button {
+    padding: 10px;
+    background: #0095f6;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+nav {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: white;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: space-around;
+    padding: 15px;
+    font-size: 25px;
+}.profile-button {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ccc;
+    text-decoration: none;
+    color: inherit;
+}
+
+.profile-button img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+
+
+    {% if username %}
+        <span style="font-size:16px;">
+            Welcome, {{ username }}!
+        </span>
+
+        <a href="/logout"
+           style="font-size:14px;">
+           Logout
+        </a>
+    {% else %}
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+    {% endif %}
+</header><div class="stories">
+
+<div class="story">👤<p>Your story</p></div>
+<div class="story">❤️<p>Alex</p></div>
+<div class="story">💙<p>Sarah</p></div>
+<div class="story">🔥<p>David</p></div>
+<div class="story">🌟<p>James</p></div>
+
+</div>
+
+{% for filename in posts %}
+
+<div class="post">
+
+<div class="username">
+👤 Instagrqm User
+</div>
+
+<img src="/uploads/{{ filename }}" alt="Post">
+
+<div class="actions">
+
+<form action="{{ url_for('like_post', post_id=post.id) }}" method="POST">
+    <button type="submit">♡</button>
+</form>
+<span class="like-count">{{ post.like_count }}</span>
+
+<button onclick="this.parentElement.nextElementSibling.nextElementSibling.scrollIntoView()">💬</button>
+<span class="comment-count">{{ post.comment_count }}</span>
+<button>➤</button>
+
+</div>
+
+<div class="caption">
+<strong>Instagrqm User</strong>
+Beautiful moments! 📸
+</div>
+
+<div class="comments">
+
+    <div class="comment-list">
+        {% for comment in post.comments %}
+            <p><strong>{{ comment.username }}</strong> {{ comment.content }}</p>
+        {% endfor %}
+    </div>
+
+    <form action="{{ url_for('add_comment', post_id=post.id) }}" method="POST">
+        <input
+            class="comment-input"
+            type="text"
+            name="content"
+            placeholder="Add a comment..."
+            maxlength="1000"
+            required>
+
+        <button class="comment-button" type="submit">Post</button>
+    </form>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+{% if not posts %}
+<p style="text-align:center;padding:40px;">
+No posts yet. Share your first photo!
+</p>
+{% endif %}
+
+<nav>
+<span>🏠</span>
+<span>🔍</span>
+<span onclick="document.getElementById('photo').click()">➕</span>
+<span>❤️</span>
+<a href="/profile" class="profile-button">
+    {% if profile_pic %}
+        <img src="{{ url_for('uploaded_file', filename=profile_pic) }}" alt="Profile">
+    {% else %}
+        👤
+    {% endif %}
+</a>
+</nav>
+
+<form id="upload-form"
+action="/upload"
+method="POST"
+enctype="multipart/form-data"
+style="padding:20px;margin-bottom:65px;">
+
+<h3>Create a post </h3>
+
+<input id="photo"
+type="file"
+name="photo"
+accept="image/*"
+required>
+
+<br><br>
+
+<button type="submit"
+class="comment-button">
+Share Photo
+</button>
+
+</form>
+
+<script>
+
+function likePost(button) {
+    if (button.innerHTML === "♡") {
+        button.innerHTML = "❤️";
+    } else {
+        button.innerHTML = "♡";
+    }
+}
+
+function addComment(button) {
+
+    const box = button.previousElementSibling;
+
+    const comment = box.value.trim();
+
+    if (comment === "") return;
+    const list = button.parentElement.querySelector(".comment-list");
+
+    const newComment = document.createElement("p");
+
+    newComment.textContent = comment;
+
+    list.appendChild(newComment);
+
+    box.value = "";
+}
+
+</script>
+<script>
+</script>
+<script>
+function likePost(button) {
+    let count = button.nextElementSibling;
+
+    if (button.innerHTML === "♡") {
+        button.innerHTML = "♥";
+        button.style.color = "red";
+        count.innerHTML = Number(count.innerHTML) + 1;
+    } else {
+        button.innerHTML = "♡";
+        button.style.color = "black";
+        count.innerHTML = Number(count.innerHTML) - 1;
+    }
+}
+</script>
+</body>
+</html>
